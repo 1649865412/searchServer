@@ -43,7 +43,9 @@
 		<property name="targetMethod" value="processApplicationEvents" />
 		<property name="concurrent" value="false" />
 	</bean>
-	<bean id="applicationEventHandlerJobTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+	
+	<!--索引build30秒一次-->
+		<bean id="applicationEventHandlerJobTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
         <property name="description" value="更新应用事件触发器，建议周期为30秒" />
 		<property name="jobDetail" ref="applicationEventHandlerJobDetail" />
 		<property name="startDelay" value="60000" />
