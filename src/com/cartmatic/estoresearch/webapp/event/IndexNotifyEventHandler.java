@@ -24,6 +24,7 @@ public class IndexNotifyEventHandler implements AppEventHandler
             IndexNotifyEvent inEvent = (IndexNotifyEvent) event;
             if (logger.isDebugEnabled())
                 logger.debug("Processing index event: " + inEvent.getCore());
+                System.out.println("Processing index event: " + inEvent.getCore());
             if (SearchConstants.CORE_NAME_PRODUCT.equals(inEvent.getCore()))
             {
                 IndexBuildService productIndexBuilder = (IndexBuildService) ContextUtil.getSpringBeanById("productIndexBuildService");
@@ -37,6 +38,11 @@ public class IndexNotifyEventHandler implements AppEventHandler
             else if (SearchConstants.CORE_NAME_CONTENT.equals(inEvent.getCore()))
             {
                 IndexBuildService contentIndexBuilder = (IndexBuildService) ContextUtil.getSpringBeanById("contentIndexBuildService");
+                contentIndexBuilder.buildIndex(inEvent.getUpdateType(), inEvent.getIds(), inEvent.getHql());
+            }
+            else if (SearchConstants.CORE_NAME_CULTURAL.equals(inEvent.getCore()))
+            {
+                IndexBuildService contentIndexBuilder = (IndexBuildService) ContextUtil.getSpringBeanById("culturalInformationIndexBuildService");
                 contentIndexBuilder.buildIndex(inEvent.getUpdateType(), inEvent.getIds(), inEvent.getHql());
             }
         }

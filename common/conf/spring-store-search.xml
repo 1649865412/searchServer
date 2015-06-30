@@ -7,7 +7,7 @@
         <property name="locations">
             <list>
                 <value>classpath:conf/app-config.properties</value>
-                <value>classpath:conf/app-config_user.properties</value>
+                <!-- <value>classpath:conf/app-config_user.properties</value> -->
             </list>
         </property>
         <property name="ignoreResourceNotFound" value="true" />

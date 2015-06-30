@@ -1,35 +1,59 @@
 package com.cartmatic.estoresearch.solr.index.impl;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.common.SolrInputDocument;
 
 import com.cartmatic.estore.Constants;
 import com.cartmatic.estore.common.model.catalog.Category;
-import com.cartmatic.estore.common.model.content.Content;
+import com.cartmatic.estore.common.model.culturalinformation.CulturalInformation;
 import com.cartmatic.estore.common.util.DateUtil;
-import com.cartmatic.estore.content.service.ContentManager;
 import com.cartmatic.estore.core.exception.ApplicationException;
+import com.cartmatic.estore.culturalinformation.service.CulturalInformationManager;
 import com.cartmatic.estore.textsearch.SearchConstants;
 
-public class ContentIndexBuildServiceImpl extends AbstractIndexBuildServiceImpl
+public class CulturalInformationIndexBuildServiceImpl extends AbstractIndexBuildServiceImpl
 {
     private SolrServer solrServer;
-    private ContentManager contentManager;
-    private static final Log logger = LogFactory.getLog(ContentIndexBuildServiceImpl.class);
+    private CulturalInformationManager culturalInformationManager;
+    private static final Log logger = LogFactory.getLog(CulturalInformationIndexBuildServiceImpl.class);
     
+    
+    
+    /**
+     * 功能:初始化
+     * <p>作者 杨荣忠 2015-6-30 上午11:14:10
+     */
     public void init()
     {
-        logger.info("ContentIndexBuildService init.");
-        solrServer = solrService.getSolrServer(SearchConstants.CORE_NAME_CONTENT);
+        logger.info("CulturalInformationIndexBuildService init.");
+        System.out.println("CulturalInformationIndexBuildService init.");
+        solrServer = solrService.getSolrServer(SearchConstants.CORE_NAME_CULTURAL);
+     
     }
     
+    /**
+     * 索引建立
+     */
     @Override
     public void buildIndex(SearchConstants.UPDATE_TYPE type, List<Integer> ids, String hql)
-    {
+    {  
+    	
+    	try
+   		{
+   			SolrServer solrServer2 = new CommonsHttpSolrServer("http://localhost:8080/solr/");
+   		}
+   		catch (MalformedURLException e)
+   		{
+   			// TODO Auto-generated catch block
+   			e.printStackTrace();
+   		}
+   		
         if (SearchConstants.UPDATE_TYPE.REBUILD_ALL.equals(type))
         {
             rebuild();
@@ -39,12 +63,13 @@ public class ContentIndexBuildServiceImpl extends AbstractIndexBuildServiceImpl
         {
             for (Integer pid : ids)
             {
-                //processIndex(contentManager.getById(pid), type);
+                //processIndex(CulturalInformationManager.getById(pid), type);
                 try
                 {
                     if (SearchConstants.UPDATE_TYPE.UPDATE.equals(type))
                     {
-                        solrServer.add(getDoc(contentManager.getById(pid)));
+                        solrServer.add(getDoc(culturalInformationManager.getById(pid)));
+                      //  solrServer2.add(getDoc(culturalInformationManager.getById(pid)));
                     }
                     else if (SearchConstants.UPDATE_TYPE.DEL.equals(type))
                     {
@@ -65,7 +90,12 @@ public class ContentIndexBuildServiceImpl extends AbstractIndexBuildServiceImpl
         }
         solrService.flushChanges(solrServer, true);
     }
+   
     
+    /**
+     * 功能:重建索引
+     * <p>作者 杨荣忠 2015-6-30 上午11:13:40
+     */
     private void rebuild()
     {
         try
@@ -83,8 +113,8 @@ public class ContentIndexBuildServiceImpl extends AbstractIndexBuildServiceImpl
     private void addAllDoc(SolrServer server)
     {
         //状态是active
-        String hql = "select p from Content p where p.status=1";
-        List<Content> rs = null;
+        String hql = "select p from CulturalInformation p where 1=1";
+        List<CulturalInformation> rs = null;
         int page = 0;
         do
         {
@@ -115,70 +145,49 @@ public class ContentIndexBuildServiceImpl extends AbstractIndexBuildServiceImpl
         while (rs != null && rs.size() == 50);
     }
     
-//    private void processIndex(Content vo, SearchConstants.UPDATE_TYPE indexType)
-//    {
-//        try
-//        {
-//            if (SearchConstants.UPDATE_TYPE.UPDATE.equals(indexType))
-//            {
-//                solrServer.add(getDoc(vo));
-//            }
-//            else if (SearchConstants.UPDATE_TYPE.DEL.equals(indexType))
-//            {
-//                solrServer.deleteById(vo.getId().toString());
-//            }
-//        }
-//        catch (Exception e)
-//        {
-//            logger.error("Adding doc to solr is Failed.", e);
-//        }
-//    }
-    
-    
     /**
      * 组合Document
      * @param vo
      * @return
      */
-    private SolrInputDocument getDoc(Content vo)
+    private SolrInputDocument getDoc(CulturalInformation vo)
     {
         SolrInputDocument doc = new SolrInputDocument();
-        // doc.setDocumentBoost(documentBoost);
         //id
         doc.addField("id", vo.getId());
-        //storeId
-        doc.addField("storeId", vo.getStoreId());
-        //contentTitle
-        doc.addField("contentTitle", vo.getContentTitle(), 1.0f);
-        //keyword
-        doc.addField("keyword", vo.getMetaKeyword());
-        //contentCode
-        doc.addField("contentCode", vo.getContentCode());
-        //parentCategoryIds 应该包括所有父目录
-        //TODO 应该包括所有父目录
-        doc.addField("parentCategoryIds", vo.getCategoryId());
-        List<Category> cats = vo.getCategory().getAllParentCategorys();
-        for (Category pc : cats)
-        {
-            doc.addField("parentCategoryIds", pc.getCategoryId());            
-        }
-        //displayable
-        if (Constants.STATUS_ACTIVE.equals(vo.getStatus()))
-            doc.addField("displayable", Boolean.TRUE);
-        else
-            doc.addField("displayable", Boolean.FALSE);
-        //expiredTime
-        if (vo.getExpiredTime() == null) //如果没有设置过期时间,就指定一个2099年,假设不会过期
-            doc.addField("expiredTime", DateUtil.getNeverEpiredDate());
-        else
-            doc.addField("expiredTime", vo.getExpiredTime());
-        //内容
-        doc.addField("contentBody",vo.getContentBody());        
+        doc.addField("title", vo.getTitle());
+       // doc.addField("textIntroduction", vo.getCulturalInformationTitle(), 1.0f);
+       //  doc.addField("releaseTime", vo.getr);
+        doc.addField("writer", vo.getWriter());
+        doc.addField("type", vo.getType());
+        doc.addField("metaKeywork", vo.getMetaKeywork()); 
         return doc;
     }    
     
-    public void setContentManager(ContentManager avalue)
+    
+/*    
+    //索引操作方法封装（更新与删除）
+    private void processIndex(CulturalInformation vo, SearchConstants.UPDATE_TYPE indexType)
     {
-        contentManager = avalue;
+        try
+        {
+            if (SearchConstants.UPDATE_TYPE.UPDATE.equals(indexType))
+            {
+                solrServer.add(getDoc(vo));
+            }
+            else if (SearchConstants.UPDATE_TYPE.DEL.equals(indexType))
+            {
+                solrServer.deleteById(vo.getId().toString());
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Adding doc to solr is Failed.", e);
+        }
+    }*/
+    
+    public void setCulturalInformationManager(CulturalInformationManager avalue)
+    {
+    	culturalInformationManager = avalue;
     }
 }

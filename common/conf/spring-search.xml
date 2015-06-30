@@ -10,6 +10,9 @@
 	<bean id="contentIndexBuildService" class="com.cartmatic.estoresearch.solr.index.impl.ContentIndexBuildServiceImpl" 
 	      autowire="byName" lazy-init="false" init-method="init">
 	</bean>
+	<bean id="culturalInformationIndexBuildService" class="com.cartmatic.estoresearch.solr.index.impl.CulturalInformationIndexBuildServiceImpl" 
+	      autowire="byName" lazy-init="false" init-method="init">
+	</bean>
 	<bean id="abcIndexBuildService" class="com.cartmatic.estoresearch.solr.index.impl.AbcIndexBuildServiceImpl" 
 	      autowire="byName" lazy-init="false" init-method="init">
 	</bean>

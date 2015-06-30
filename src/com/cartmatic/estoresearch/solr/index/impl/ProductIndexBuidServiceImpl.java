@@ -46,8 +46,6 @@ public class ProductIndexBuidServiceImpl extends AbstractIndexBuildServiceImpl
 		this.productStatManager = productStatManager;
 	}
 
-
-
 	private static final Log logger = LogFactory.getLog(ProductIndexBuidServiceImpl.class);
 
     public void init()
