@@ -24,7 +24,6 @@ public class CulturalInformationIndexBuildServiceImpl extends AbstractIndexBuild
     private static final Log logger = LogFactory.getLog(CulturalInformationIndexBuildServiceImpl.class);
     
     
-    
     /**
      * 功能:初始化
      * <p>作者 杨荣忠 2015-6-30 上午11:14:10
