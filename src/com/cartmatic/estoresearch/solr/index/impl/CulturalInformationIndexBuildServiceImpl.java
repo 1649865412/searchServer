@@ -31,7 +31,7 @@ public class CulturalInformationIndexBuildServiceImpl extends AbstractIndexBuild
     public void init()
     {
         logger.info("CulturalInformationIndexBuildService init.");
-        System.out.println("CulturalInformationIndexBuildService init.");
+      //  System.out.println("CulturalInformationIndexBuildService init.");
         solrServer = solrService.getSolrServer(SearchConstants.CORE_NAME_CULTURAL);
      
     }
